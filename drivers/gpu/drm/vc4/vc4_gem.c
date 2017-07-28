@@ -484,6 +484,7 @@ again:
 	 */
 	if (exec->ct0ca != exec->ct0ea) {
 		submit_cl(dev, 0, exec->ct0ca, exec->ct0ea);
+		trace_vc4_submit_cl(dev, exec->seqno, false);
 	} else {
 		struct vc4_exec_info *next;
 
@@ -518,6 +519,7 @@ vc4_submit_next_render_job(struct drm_device *dev)
 	vc4_flush_texture_caches(dev);
 
 	submit_cl(dev, 1, exec->ct1ca, exec->ct1ea);
+	trace_vc4_submit_cl(dev, exec->seqno, true);
 }
 
 void
@@ -1133,6 +1135,8 @@ vc4_submit_cl_ioctl(struct drm_device *dev, void *data,
 		DRM_DEBUG("VC4_SUBMIT_CL with no VC4 V3D probed\n");
 		return -ENODEV;
 	}
+
+	trace_vc4_submit_cl_begin(dev);
 
 	if ((args->flags & ~(VC4_SUBMIT_CL_USE_CLEAR_COLOR |
 			     VC4_SUBMIT_CL_FIXED_RCL_ORDER |
